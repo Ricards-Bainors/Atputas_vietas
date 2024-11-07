@@ -1,0 +1,1 @@
+# Atputas_vietas
