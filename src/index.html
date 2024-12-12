@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map of Recreational Areas</title>
+    <link rel="stylesheet" href="../style.css"> <!-- Adjusted path -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
+</head>
+<body>
+    <div id="map" style="height: 100vh;"></div>
+    <script src="functions.js"></script> <!-- Corrected path -->
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([56.8796, 24.6032], 7); // Centered on Latvia
+
+        // Add a tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Function to add markers to the map
+        function addMarkerToMap(latLng, properties) {
+            const popupContent = `
+                <strong>${properties.PLACENAME}</strong><br>
+                <strong>Subtype:</strong> ${properties.PLACESUBTY}<br>
+                <strong>Region Code:</strong> ${properties.REG_CODE}<br>
+                <strong>District:</strong> ${properties.LVM_DISTRI}<br>
+                <strong>Block Key:</strong> ${properties.BLOCKKEY}
+            `;
+            L.marker(latLng).addTo(map)
+                .bindPopup(popupContent)
+                .openPopup();
+        }
+
+        // Load the JSON data
+        fetch('data/geomap.json') // Corrected path
+            .then(response => response.json())
+            .then(data => {
+                const features = data.features;
+                features.forEach(feature => {
+                    const coordinates = feature.geometry.coordinates;
+                    const latLng = LKS92WGS84.convertXYToLatLon(coordinates);
+                    addMarkerToMap(latLng, feature.properties);
+                });
+            })
+            .catch(error => console.error('Error loading JSON data:', error));
+    </script>
+</body>
+</html>
